@@ -247,6 +247,7 @@ function Workspace({ user }: { user: User }) {
                 cards={ws.cards}
                 lastBoard={lastBoard}
                 onNewBoard={() => setBoardDialog('new')}
+                onAddTask={(boardId, draft) => ws.saveCard(draft, undefined, boardId)}
               />
             )}
 

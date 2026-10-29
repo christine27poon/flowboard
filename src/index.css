@@ -948,29 +948,40 @@ li.tile:hover {
 .tile__empty {
   color: var(--text-muted);
 }
-.tile__counts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
-  gap: 4px;
-  margin: 0;
-  text-align: center;
-}
-.tile__counts div {
+.tile__tasks {
   display: flex;
-  flex-direction: column-reverse;
-  padding: 6px 2px;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile__tasks li {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 10px;
   background: var(--bg);
   border-radius: 6px;
-}
-.tile__counts dt {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
+}
+.tile__tasks .overdue {
+  font-weight: 700;
+}
+/* Sit above the stretched board link so these can be clicked on their own. */
+.tile__task,
+.tile__add {
+  position: relative;
+}
+.tile__task {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text);
   overflow-wrap: anywhere;
 }
-.tile__counts dd {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 800;
+.tile__add {
+  align-self: flex-start;
+  margin-top: auto;
 }
 .progress {
   height: 8px;

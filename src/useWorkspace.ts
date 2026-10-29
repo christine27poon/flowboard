@@ -216,16 +216,20 @@ export function useWorkspace(userId: string) {
   }
 
   /**
-   * Update the card with `id`, or add a new one to the active board. Returns the card's id and a
-   * promise for whether the server accepted the change (the screen updates straight away).
+   * Update the card with `id`, or add a new one to `boardId` (default: the active board). Returns
+   * the card's id and a promise for whether the server accepted the change (the screen updates
+   * straight away).
    */
   function saveCard(
     draft: CardDraft,
     id?: string,
+    boardId?: string,
   ): { id: string; saved: Promise<boolean> } | undefined {
     if (!workspace) return undefined
     const existing = id ? workspace.cards.find((c) => c.id === id) : undefined
     if (id && !existing) return undefined
+    const targetBoardId = boardId ?? workspace.activeBoardId
+    if (!existing && !workspace.boards.some((b) => b.id === targetBoardId)) return undefined
 
     const now = new Date().toISOString()
     let card: Card
@@ -240,8 +244,8 @@ export function useWorkspace(userId: string) {
       card = {
         ...draft,
         id: newId(),
-        boardId: workspace.activeBoardId,
-        position: endPosition(workspace.cards, workspace.activeBoardId, draft.status),
+        boardId: targetBoardId,
+        position: endPosition(workspace.cards, targetBoardId, draft.status),
         createdAt: now,
         updatedAt: now,
       }

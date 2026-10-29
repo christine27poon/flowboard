@@ -81,6 +81,28 @@ describe('creating a card', () => {
     expect(dbRow(created!.id)).toMatchObject({ title: 'Brand new', board_id: 'b1', assignee: 'Sam', due_date: '2031-01-01' })
   })
 
+  it('can add to a board other than the one being viewed, without switching to it', async () => {
+    const { result } = await loaded()
+    let created: ReturnType<typeof result.current.saveCard>
+    act(() => {
+      created = result.current.saveCard(draft({ title: 'For home' }), undefined, 'b2')
+    })
+    expect(result.current.cards.find((c) => c.title === 'For home')).toMatchObject({ boardId: 'b2', position: 1 })
+    expect(result.current.activeBoardId).toBe('b1')
+    expect(await created!.saved).toBe(true)
+    expect(dbRow(created!.id)).toMatchObject({ title: 'For home', board_id: 'b2' })
+  })
+
+  it('adds nothing for a board that does not exist', async () => {
+    const { result } = await loaded()
+    let created: ReturnType<typeof result.current.saveCard>
+    act(() => {
+      created = result.current.saveCard(draft(), undefined, 'ghost')
+    })
+    expect(created!).toBeUndefined()
+    expect(result.current.cards).toHaveLength(3)
+  })
+
   it('files a card in the column it was created for', async () => {
     const { result } = await loaded()
     act(() => {

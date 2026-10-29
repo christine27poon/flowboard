@@ -14,7 +14,7 @@ const cards = [
 ]
 
 const setup = (overrides: Partial<Parameters<typeof HomePage>[0]> = {}) =>
-  renderWithProviders(<HomePage boards={[work, hobby]} cards={cards} lastBoard={work} onNewBoard={vi.fn()} {...overrides} />)
+  renderWithProviders(<HomePage boards={[work, hobby]} cards={cards} lastBoard={work} onNewBoard={vi.fn()} onAddTask={vi.fn()} {...overrides} />)
 
 describe('board tiles', () => {
   it('summarise each board in words, not just colour', () => {
@@ -22,9 +22,39 @@ describe('board tiles', () => {
     const tile = screen.getByRole('heading', { level: 4, name: 'Work' }).closest('li')!
     expect(within(tile).getByText('3 cards')).toBeInTheDocument()
     expect(within(tile).getByText('1 of 3 done')).toBeInTheDocument()
+    // The per-column counts are gone; the tile lists tasks instead.
+    for (const label of ['Backlog', 'In Progress', 'In Review']) {
+      expect(within(tile).queryByText(label)).not.toBeInTheDocument()
+    }
     expect(within(tile).getByText('1 overdue')).toBeInTheDocument()
     expect(within(tile).getByText('1 due this week')).toBeInTheDocument()
     expect(within(tile).getByRole('link', { name: 'Work' })).toHaveAttribute('href', '/?board=work')
+  })
+
+  it('lists the soonest-due open tasks as links, leaving out finished ones', () => {
+    setup()
+    const tile = screen.getByRole('heading', { level: 4, name: 'Work' }).closest('li')!
+    const tasks = within(within(tile).getByRole('list', { name: 'Next tasks on Work' })).getAllByRole('listitem')
+    expect(tasks.map((t) => within(t).getByRole('link').textContent)).toEqual(['Send invoice', 'Plan trip'])
+    expect(within(tile).getByRole('link', { name: 'Send invoice' })).toHaveAttribute('href', '/?board=work&card=late')
+    expect(within(tasks[0]).getByText(/^Overdue, was due/)).toBeInTheDocument()
+    expect(within(tasks[1]).getByText(/^Due /)).toBeInTheDocument()
+    expect(within(tile).queryByText('Old news')).not.toBeInTheDocument()
+  })
+
+  it('shows no more than three tasks per board, the three due first', () => {
+    const many = [5, 1, 4, 2, 3].map((d) => makeCard({ title: `Due in ${d}`, boardId: 'work', dueDate: isoDay(d) }))
+    setup({ cards: many })
+    const tile = screen.getByRole('heading', { level: 4, name: 'Work' }).closest('li')!
+    const list = within(tile).getByRole('list', { name: 'Next tasks on Work' })
+    expect(within(list).getAllByRole('link').map((a) => a.textContent)).toEqual(['Due in 1', 'Due in 2', 'Due in 3'])
+  })
+
+  it('says so when every card on a board is done', () => {
+    setup({ cards: [makeCard({ boardId: 'work', status: 'done' })] })
+    const tile = screen.getByRole('heading', { level: 4, name: 'Work' }).closest('li')!
+    expect(within(tile).getByText('Everything is done')).toBeInTheDocument()
+    expect(within(tile).queryByRole('list', { name: /Next tasks/ })).not.toBeInTheDocument()
   })
 
   it('says so when a board is empty', () => {
@@ -33,11 +63,53 @@ describe('board tiles', () => {
     expect(within(tile).getByText('No cards yet')).toBeInTheDocument()
   })
 
+  it('offers to add a task on every tile, empty boards included', () => {
+    setup()
+    expect(screen.getByRole('button', { name: 'Add task to Work' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add task to Hobbies' })).toBeInTheDocument()
+  })
+
   it('has a way to start another board', async () => {
     const onNewBoard = vi.fn()
     const { user } = setup({ onNewBoard })
     await user.click(screen.getByRole('button', { name: '+ New board' }))
     expect(onNewBoard).toHaveBeenCalledOnce()
+  })
+})
+
+describe('adding a task from a tile', () => {
+  it('opens the form for that board, without leaving Home', async () => {
+    const { user, navigate } = setup()
+    await user.click(screen.getByRole('button', { name: 'Add task to Hobbies' }))
+    expect(await screen.findByRole('heading', { name: 'New card in Hobbies' })).toBeInTheDocument()
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it('saves the new task to that board and closes the form', async () => {
+    const onAddTask = vi.fn()
+    const { user } = setup({ onAddTask })
+    await user.click(screen.getByRole('button', { name: 'Add task to Hobbies' }))
+
+    const form = await screen.findByRole('dialog', { name: 'New card in Hobbies' })
+    await user.type(within(form).getByLabelText(/Title/), 'Buy yarn')
+    await user.type(within(form).getByLabelText(/Assignee/), 'Kim')
+    await user.click(within(form).getByRole('button', { name: 'Add card' }))
+
+    expect(onAddTask).toHaveBeenCalledOnce()
+    expect(onAddTask).toHaveBeenCalledWith(
+      'hobby',
+      expect.objectContaining({ title: 'Buy yarn', assignee: 'Kim', status: 'backlog' }),
+    )
+    expect(screen.queryByRole('dialog', { name: /New card/ })).not.toBeInTheDocument()
+  })
+
+  it('adds nothing when the form is cancelled', async () => {
+    const onAddTask = vi.fn()
+    const { user } = setup({ onAddTask })
+    await user.click(screen.getByRole('button', { name: 'Add task to Work' }))
+    const form = await screen.findByRole('dialog', { name: 'New card in Work' })
+    await user.click(within(form).getByRole('button', { name: 'Cancel' }))
+    expect(onAddTask).not.toHaveBeenCalled()
   })
 })
 

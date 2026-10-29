@@ -62,6 +62,28 @@ describe('Home', () => {
   })
 })
 
+describe('adding a task from Home', () => {
+  it('saves it to the chosen board, stays on Home, and shows it on the tile', async () => {
+    const user = await open()
+    await pageHeading('Home')
+
+    await user.click(screen.getByRole('button', { name: 'Add task to Garden' }))
+    const form = await screen.findByRole('dialog', { name: 'New card in Garden' })
+    await user.type(within(form).getByLabelText(/Title/), 'Plant tulips')
+    await user.type(within(form).getByLabelText(/Assignee/), 'Sam')
+    await user.click(within(form).getByRole('button', { name: 'Add card' }))
+
+    // Still on Home, and the tile now lists the new task.
+    expect(await pageHeading('Home')).toBeInTheDocument()
+    expect(window.location.search).toBe('')
+    const list = await screen.findByRole('list', { name: 'Next tasks on Garden' })
+    expect(within(list).getByRole('link', { name: 'Plant tulips' })).toBeInTheDocument()
+
+    // Saved to the Garden board in the database, not the one last viewed.
+    await waitFor(() => expect(db.cards.find((c) => c.title === 'Plant tulips')).toMatchObject({ board_id: 'b2' }))
+  })
+})
+
 describe('moving around', () => {
   it('opens a board from its tile, focuses the new heading, and updates address and title', async () => {
     const user = await open()

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { DUE_SOON_DAYS, dueSoonCards, recentlyUpdatedCards, summarizeBoard } from './summaries'
+import {
+  DUE_SOON_DAYS,
+  dueSoonCards,
+  recentlyUpdatedCards,
+  summarizeBoard,
+  upcomingCards,
+} from './summaries'
 import { isoDay, makeBoard, makeCard } from './test/fixtures'
 
 const work = makeBoard({ id: 'work', name: 'Work' })
@@ -77,5 +83,46 @@ describe('recentlyUpdatedCards', () => {
       makeCard({ title: `c${i}`, boardId: 'work', updatedAt: `${d}T00:00:00Z` }),
     )
     expect(recentlyUpdatedCards([work], cards, 2).map((i) => i.card.title)).toEqual(['c1', 'c2'])
+  })
+})
+
+describe('upcomingCards', () => {
+  it('lists a board\'s open cards, soonest due first, overdue ones leading', () => {
+    const cards = [
+      makeCard({ title: 'later', boardId: 'work', dueDate: isoDay(20) }),
+      makeCard({ title: 'late', boardId: 'work', dueDate: isoDay(-3) }),
+      makeCard({ title: 'soon', boardId: 'work', dueDate: isoDay(2) }),
+    ]
+    expect(upcomingCards('work', cards).map((c) => c.title)).toEqual(['late', 'soon', 'later'])
+  })
+
+  it('shows at most three', () => {
+    const cards = Array.from({ length: 6 }, (_, i) =>
+      makeCard({ title: `t${i}`, boardId: 'work', dueDate: isoDay(i) }),
+    )
+    expect(upcomingCards('work', cards).map((c) => c.title)).toEqual(['t0', 't1', 't2'])
+  })
+
+  it('skips finished cards and other boards\' cards, even when they are due first', () => {
+    const cards = [
+      makeCard({ title: 'finished', boardId: 'work', status: 'done', dueDate: isoDay(-5) }),
+      makeCard({ title: 'elsewhere', boardId: 'home', dueDate: isoDay(-5) }),
+      makeCard({ title: 'open', boardId: 'work', dueDate: isoDay(5) }),
+    ]
+    expect(upcomingCards('work', cards).map((c) => c.title)).toEqual(['open'])
+  })
+
+  it('breaks ties on the same day by priority, then title', () => {
+    const day = isoDay(1)
+    const cards = [
+      makeCard({ title: 'b low', boardId: 'work', dueDate: day, priority: 'Low' }),
+      makeCard({ title: 'z high', boardId: 'work', dueDate: day, priority: 'High' }),
+      makeCard({ title: 'a high', boardId: 'work', dueDate: day, priority: 'High' }),
+    ]
+    expect(upcomingCards('work', cards).map((c) => c.title)).toEqual(['a high', 'z high', 'b low'])
+  })
+
+  it('is empty for a board with nothing open', () => {
+    expect(upcomingCards('work', [])).toEqual([])
   })
 })

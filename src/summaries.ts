@@ -62,6 +62,22 @@ export function dueSoonCards(boards: Board[], cards: Card[], now: Date = new Dat
   )
 }
 
+/** Most tasks a board tile on Home lists. */
+export const MAX_TILE_TASKS = 3
+
+/** A board's tasks that aren't done, soonest due first (overdue ones lead). */
+export function upcomingCards(boardId: string, cards: Card[], limit = MAX_TILE_TASKS): Card[] {
+  return cards
+    .filter((c) => c.boardId === boardId && c.status !== 'done')
+    .sort(
+      (a, b) =>
+        (a.dueDate < b.dueDate ? -1 : a.dueDate > b.dueDate ? 1 : 0) ||
+        PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] ||
+        a.title.localeCompare(b.title),
+    )
+    .slice(0, limit)
+}
+
 export interface RecentItem {
   card: Card
   board: Board

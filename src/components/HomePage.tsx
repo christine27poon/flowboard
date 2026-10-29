@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { formatDue, formatRelative } from '../dates'
+import { useAnnounce } from '../feedback'
 import {
   DUE_SOON_DAYS,
   dueSoonCards,
   recentlyUpdatedCards,
   summarizeBoard,
+  upcomingCards,
   type DueItem,
 } from '../summaries'
-import { STATUS_LABELS, type Board, type Card } from '../types'
+import { STATUS_LABELS, type Board, type Card, type CardDraft } from '../types'
 import { BoardTile } from './BoardTile'
+import { CardModal } from './CardModal'
 import { RouteLink } from './RouteLink'
 
 interface HomePageProps {
@@ -16,6 +20,8 @@ interface HomePageProps {
   /** The board the user was last on, if it still exists. */
   lastBoard: Board | null
   onNewBoard: () => void
+  /** Add a card to a board without opening it. */
+  onAddTask: (boardId: string, draft: CardDraft) => void
 }
 
 /** Most rows shown under "Due soon" before the rest are summarized as a count. */
@@ -31,7 +37,10 @@ function dueLabel({ days, card }: DueItem): string {
   return `Due ${formatDue(card.dueDate)}`
 }
 
-export function HomePage({ boards, cards, lastBoard, onNewBoard }: HomePageProps) {
+export function HomePage({ boards, cards, lastBoard, onNewBoard, onAddTask }: HomePageProps) {
+  const announce = useAnnounce()
+  // The board a task is being added to, or null when the form is closed.
+  const [addingTo, setAddingTo] = useState<Board | null>(null)
   const summaries = boards.map((board) => summarizeBoard(board, cards))
   const due = dueSoonCards(boards, cards)
   const shownDue = due.slice(0, MAX_DUE_ROWS)
@@ -59,7 +68,12 @@ export function HomePage({ boards, cards, lastBoard, onNewBoard }: HomePageProps
         </h3>
         <ul className="tiles">
           {summaries.map((summary) => (
-            <BoardTile key={summary.board.id} summary={summary} />
+            <BoardTile
+              key={summary.board.id}
+              summary={summary}
+              tasks={upcomingCards(summary.board.id, cards)}
+              onAddTask={setAddingTo}
+            />
           ))}
           <li>
             <button type="button" className="tile tile--new" onClick={onNewBoard}>
@@ -68,6 +82,19 @@ export function HomePage({ boards, cards, lastBoard, onNewBoard }: HomePageProps
           </li>
         </ul>
       </section>
+
+      <CardModal
+        open={addingTo !== null}
+        status="backlog"
+        boardName={addingTo?.name}
+        onSave={(draft) => {
+          if (!addingTo) return
+          onAddTask(addingTo.id, draft)
+          announce(`Added “${draft.title}” to ${addingTo.name}.`)
+          setAddingTo(null)
+        }}
+        onClose={() => setAddingTo(null)}
+      />
 
       <section aria-labelledby="home-due">
         <h3 id="home-due" className="home__heading">

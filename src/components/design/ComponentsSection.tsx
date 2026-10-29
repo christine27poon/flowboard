@@ -129,20 +129,19 @@ export function ComponentsSection() {
               <span className="btn btn--small">Edit board</span>
             </div>
           </div>
-          <p className="ds-demo__label">Board tile on Home: counts, progress as words and a bar, due dates</p>
+          <p className="ds-demo__label">Board tile on Home: next three tasks, progress as words and a bar, due dates, add task</p>
           <ul className="tiles" style={{ maxWidth: 280 }}>
             <li className="tile">
               <h4 className="tile__name">Work</h4>
               <p className="tile__total">12 cards</p>
-              <dl className="tile__counts">
-                <div><dt>Backlog</dt><dd>4</dd></div>
-                <div><dt>In Progress</dt><dd>3</dd></div>
-                <div><dt>In Review</dt><dd>1</dd></div>
-                <div><dt>Done</dt><dd>4</dd></div>
-              </dl>
+              <ul className="tile__tasks" aria-label="Next tasks on Work">
+                <li><a className="tile__task" href="#tile-demo">Send invoice</a><span className="overdue">Overdue, was due Oct 12, 2026</span></li>
+                <li><a className="tile__task" href="#tile-demo">Plan trip</a><span>Due Oct 16, 2026</span></li>
+              </ul>
               <div className="progress" aria-hidden="true"><span className="progress__bar" style={{ width: '33%' }} /></div>
               <p className="tile__progress">4 of 12 done</p>
               <p className="tile__due"><span className="overdue">1 overdue</span><span>3 due this week</span></p>
+              <span className="btn btn--small tile__add">+ Add task</span>
             </li>
           </ul>
         </div>

@@ -76,12 +76,12 @@ describe('automated WCAG 2.2 A/AA scan finds nothing on', () => {
   })
 
   it('Home', async () => {
-    render(<Shell label="Home"><HomePage boards={boards} cards={cards} lastBoard={boards[0]} onNewBoard={noop} /></Shell>)
+    render(<Shell label="Home"><HomePage boards={boards} cards={cards} lastBoard={boards[0]} onNewBoard={noop} onAddTask={noop} /></Shell>)
     expect(await axeViolations(document.body)).toEqual([])
   })
 
   it('an empty Home', async () => {
-    render(<Shell label="Home"><HomePage boards={boards} cards={[]} lastBoard={null} onNewBoard={noop} /></Shell>)
+    render(<Shell label="Home"><HomePage boards={boards} cards={[]} lastBoard={null} onNewBoard={noop} onAddTask={noop} /></Shell>)
     expect(await axeViolations(document.body)).toEqual([])
   })
 
