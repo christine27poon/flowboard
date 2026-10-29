@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Board: simple kanban boards for tasks and due dates</title>
+    <meta
+      name="description"
+      content="Team Board is a simple kanban board for planning work. Create boards, track due dates and priorities, search cards, and keep everything private to your account."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fff7fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1f1a2b" media="(prefers-color-scheme: dark)" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Team Board" />
+    <meta property="og:title" content="Team Board: simple kanban boards for tasks and due dates" />
+    <meta
+      property="og:description"
+      content="Create boards, track due dates and priorities, search cards, and keep everything private to your account."
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Team Board: simple kanban boards for tasks and due dates" />
+    <meta
+      name="twitter:description"
+      content="Create boards, track due dates and priorities, search cards, and keep everything private to your account."
+    />
+  </head>
+  <body>
+    <!--
+      Shown to crawlers that don't run JavaScript (and until the app loads). React replaces everything
+      inside #root when it starts. The wording matches the sign-in screen.
+    -->
+    <div id="root">
+      <main class="auth">
+        <div class="auth__card sheet">
+          <h1>Team Board</h1>
+          <p>
+            Plan work on simple kanban boards. Track due dates and priorities, search your cards, and
+            keep everything private to your account.
+          </p>
+          <ul>
+            <li>Boards with Backlog, In Progress, In Review and Done columns</li>
+            <li>Due dates, priorities, assignees and a “Due soon” list across boards</li>
+            <li>Keyboard and screen-reader friendly, with light and dark themes</li>
+          </ul>
+          <noscript><p>Team Board needs JavaScript turned on to sign in and use your boards.</p></noscript>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

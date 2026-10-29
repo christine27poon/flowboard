@@ -1,0 +1,56 @@
+name: CI
+
+# Runs on every push to the main branch and on every pull request.
+# To make a failing run block merging: GitHub repo > Settings > Branches > branch protection rule
+# > "Require status checks to pass" > select "Lint, test and build".
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+# Only the latest run for a branch matters.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      # No secrets and no network access to Supabase are needed: the tests use an in-memory fake
+      # and fail loudly if anything tries to reach the real database.
+      - name: Unit tests
+        run: npm run test:unit
+
+      # Guards for things that must not quietly break: security headers, database policies, SEO
+      # tags, accessibility CSS and the production build output.
+      - name: Regression tests
+        run: npm run test:regression
+
+      # The build type-checks the app first (tsc -b), then bundles it.
+      - name: Build
+        run: npm run build
+
+      - name: Check dependencies for known vulnerabilities
+        run: npm audit --omit=dev --audit-level=high

@@ -1,0 +1,20 @@
+# Team Board
+
+> Team Board is a simple kanban board web app for planning work. You create boards, add cards to four columns (Backlog, In Progress, In Review, Done), track due dates and priorities, search cards, and see what is due soon across all boards. Every account is private: boards and cards are visible only to the person who created them.
+
+## What the public page contains
+
+- The only public page is the sign-in and sign-up screen at the site root. Everything else (Home, boards, cards) requires an account and is not available to crawlers or assistants.
+- There is no public content, pricing or API.
+
+## Features
+
+- Boards with a header, a board switcher and a Home page that summarizes every board.
+- Cards with title, assignee, priority (High, Medium, Low), due date, column and description.
+- Move cards by dragging, or with Move up / Move down buttons and a Column field for keyboard and touch users.
+- Search and priority filters, a "Due soon" list across boards, and Undo after deleting a card.
+- Designed to meet WCAG 2.2 AA: keyboard operable, screen-reader friendly, light and dark themes, reduced-motion support.
+
+## Privacy
+
+- Sign-in uses email and password. Data is stored per account, and database access rules prevent one account from reading or changing another's data.
