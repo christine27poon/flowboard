@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithProviders } from '../test/render'
 import { isoDay, makeBoard, makeCard } from '../test/fixtures'
@@ -101,6 +101,23 @@ describe('adding a task from a tile', () => {
       expect.objectContaining({ title: 'Buy yarn', assignee: 'Kim', status: 'backlog' }),
     )
     expect(screen.queryByRole('dialog', { name: /New card/ })).not.toBeInTheDocument()
+  })
+
+  it('closes without adding anything when you click outside the form', async () => {
+    const onAddTask = vi.fn()
+    const { user } = setup({ onAddTask })
+    await user.click(screen.getByRole('button', { name: 'Add task to Work' }))
+    const form = await screen.findByRole('dialog', { name: 'New card in Work' })
+    await user.type(within(form).getByLabelText(/Title/), 'Half written')
+
+    // jsdom has no layout: give the dialog a box, then click well outside it.
+    const box = { left: 100, right: 500, top: 100, bottom: 400, width: 400, height: 300, x: 100, y: 100 }
+    form.getBoundingClientRect = () => ({ ...box, toJSON: () => box })
+    fireEvent.mouseDown(form, { clientX: 10, clientY: 10 })
+    fireEvent.click(form, { clientX: 10, clientY: 10 })
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: /New card/ })).not.toBeInTheDocument())
+    expect(onAddTask).not.toHaveBeenCalled()
   })
 
   it('adds nothing when the form is cancelled', async () => {

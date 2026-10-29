@@ -130,7 +130,7 @@ export function ComponentsSection() {
             </div>
           </div>
           <p className="ds-demo__label">Board tile on Home: next three tasks, progress as words and a bar, due dates, add task</p>
-          <ul className="tiles" style={{ maxWidth: 280 }}>
+          <ul className="tiles" style={{ maxWidth: 340 }}>
             <li className="tile">
               <h4 className="tile__name">Work</h4>
               <p className="tile__total">12 cards</p>
@@ -260,7 +260,7 @@ export function ComponentsSection() {
         <ul className="ds-list">
           <li><strong>Dialog</strong> (<code>Dialog</code> with class <code>modal</code>): short, focused tasks: create a card, create or rename a board. Centered, with a dimmed and blurred backdrop.</li>
           <li><strong>Side panel</strong> (<code>Dialog</code> with class <code>panel</code>): looking at and editing one thing in full, with the board still visible behind it. Sticky header with a Close button; content scrolls.</li>
-          <li>Both are native <code>&lt;dialog&gt;</code> elements opened with <code>showModal()</code>, so focus is trapped, <kbd>Esc</kbd> closes, and focus returns to where it came from. Mark the field to focus first with <code>data-autofocus</code>.</li>
+          <li>Both are native <code>&lt;dialog&gt;</code> elements opened with <code>showModal()</code>, so focus is trapped, <kbd>Esc</kbd> closes, clicking the dimmed area outside closes (unsaved edits are dropped, as with Esc), and focus returns to where it came from. Mark the field to focus first with <code>data-autofocus</code>.</li>
           <li>Content mounts only while open, so every open starts with a clean form.</li>
         </ul>
 
